@@ -1,0 +1,16 @@
+[package]
+authors = ["nokaa <nokaa@cock.li>"]
+name = "mithril"
+version = "0.1.0"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+rlibc = "1.0.0"
+
+[lib]
+crate-type = ["staticlib"]
