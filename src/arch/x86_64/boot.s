@@ -5,6 +5,7 @@ section .text
 bits 32
 start:
 	mov esp, stack_top
+	mov edi, ebx	; Move Multiboot info pointer to edi
 
 	call check_multiboot
 	call check_cpuid
@@ -12,6 +13,7 @@ start:
 
 	call set_up_page_tables
 	call enable_paging
+	call set_up_SSE
 
 	; load the 64-bit GDT
 	lgdt [gdt64.pointer]
@@ -175,7 +177,7 @@ p3_table:
 p2_table:
 	resb 4096
 stack_bottom:
-	resb 64
+	resb 4096
 stack_top:
 
 section .rodata
