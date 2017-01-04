@@ -10,6 +10,7 @@ extern crate volatile;
 
 #[macro_use]
 mod vga_buffer;
+mod memory;
 
 #[no_mangle]
 pub extern "C" fn rust_main(multiboot_information_address: usize) {
@@ -50,6 +51,20 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     println!("multiboot start: 0x{:x}, multiboot end: 0x{:x}",
              multiboot_start,
              multiboot_end);
+
+    let mut frame_allocator = memory::AreaFrameAllocator::new(kernel_start as usize,
+                                                              kernel_end as usize,
+                                                              multiboot_start,
+                                                              multiboot_end,
+                                                              memory_map_tag.memory_areas());
+
+    for i in 0.. {
+        use memory::FrameAllocator;
+        if let None = frame_allocator.allocate_frame() {
+            println!("allocated {} frames", i);
+            break;
+        }
+    }
 
     loop {}
 }
