@@ -1,14 +1,12 @@
-arch ?= x86_64
-kernel := build/kernel-$(arch).bin
-iso := build/os-$(arch).iso
+arch = "x86_64"
+kernel = "build/kernel-$(arch).bin"
+iso = "build/os-$(arch).iso"
 
-linker_script := src/arch/$(arch)/linker.ld
-grub_cfg := src/arch/$(arch)/grub.cfg
-assembly_source_files := $(wildcard src/arch/$(arch)/*.s)
-assembly_object_files := $(patsubst src/arch/$(arch)/%.s, \
+linker_script = "src/arch/$(arch)/linker.ld"
+grub_cfg = "src/arch/$(arch)/grub.cfg"
+assembly_source_files = $(wildcard src/arch/$(arch)/*.s)
+assembly_object_files = $(patsubst src/arch/$(arch)/%.s, \
         build/arch/$(arch)/%.o, $(assembly_source_files))
-
-.PHONY: all clean run iso
 
 all: $(kernel)
 
@@ -28,7 +26,11 @@ $(iso): $(kernel) $(grub_cfg)
     @rm -r build/isofiles
 
 $(kernel): $(assembly_object_files) $(linker_script)
-    @ld -n -T $(linker_script) -o $(kernel) $(assembly_object_files)
+    @ld -n --gc-sections -T $(linker_script) -o $(kernel) \
+	    $(assembly_object_files) $(rust_os)
+
+cargo:
+    @cargo build --target $(target)
 
 # compile assembly files
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
