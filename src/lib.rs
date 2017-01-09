@@ -61,7 +61,11 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
                                                               multiboot_end,
                                                               memory_map_tag.memory_areas());
 
-    memory::test_paging(&mut frame_allocator);
+    enable_nxe_bit();
+    enable_write_protect_bit();
+
+    memory::remap_the_kernel(&mut frame_allocator, boot_info);
+    println!("It did not crash!");
 
     loop {}
 }
@@ -81,4 +85,20 @@ extern "C" fn panic_fmt(fmt: core::fmt::Arguments, file: &'static str, line: u32
 #[no_mangle]
 pub extern "C" fn _Unwind_Resume() -> ! {
     loop {}
+}
+
+fn enable_nxe_bit() {
+    use x86::shared::msr::{IA32_EFER, rdmsr, wrmsr};
+
+    let nxe_bit = 1 << 11;
+    unsafe {
+        let efer = rdmsr(IA32_EFER);
+        wrmsr(IA32_EFER, efer | nxe_bit);
+    }
+}
+
+fn enable_write_protect_bit() {
+    use x86::shared::control_regs::{cr0, cr0_write, CR0_WRITE_PROTECT};
+
+    unsafe { cr0_write(cr0() | CR0_WRITE_PROTECT) };
 }
