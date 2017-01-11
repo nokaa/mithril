@@ -1,0 +1,7 @@
+[package]
+authors = ["nokaa <nokaa@cock.li>"]
+name = "bump_allocator"
+version = "0.1.0"
+
+[dependencies]
+spin = "0.4.5"
