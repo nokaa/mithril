@@ -4,6 +4,7 @@ name = "mithril"
 version = "0.1.0"
 
 [dependencies]
+bit_field = "0.6.1"
 bitflags = "0.7.0"
 multiboot2 = "0.3.1"
 once = "0.3.2"
@@ -11,11 +12,12 @@ rlibc = "1.0.0"
 spin = "0.4.5"
 volatile = "0.2.1"
 
-#[dependencies.bump_allocator]
-#path = "libs/bump_allocator"
-
 [dependencies.hole_list_allocator]
 path = "libs/hole_list_allocator"
+
+[dependencies.lazy_static]
+version = "0.2.1"
+features = ["spin_no_std"]
 
 [dependencies.x86]
 default-features = false

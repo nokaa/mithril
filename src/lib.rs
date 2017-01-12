@@ -1,15 +1,19 @@
 #![feature(alloc, collections)]
+#![feature(asm)]
 #![feature(const_fn)]
 #![feature(lang_items)]
 #![feature(unique)]
 #![no_std]
 
 extern crate alloc;
+extern crate bit_field;
 #[macro_use]
 extern crate bitflags;
 #[macro_use]
 extern crate collections;
 extern crate hole_list_allocator;
+#[macro_use]
+extern crate lazy_static;
 extern crate multiboot2;
 #[macro_use]
 extern crate once;
@@ -18,9 +22,10 @@ extern crate spin;
 extern crate volatile;
 extern crate x86;
 
-mod memory;
 #[macro_use]
 mod vga_buffer;
+mod interrupts;
+mod memory;
 
 #[no_mangle]
 pub extern "C" fn rust_main(multiboot_information_address: usize) {
@@ -35,21 +40,14 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     // set up guard page and map the heap pages
     memory::init(boot_info);
 
-    use alloc::boxed::Box;
-    let mut heap_test = Box::new(42);
-    *heap_test -= 15;
-    let heap_test2 = Box::new("hello");
-    println!("{:?} {:?}", heap_test, heap_test2);
+    // initialize our IDT
+    interrupts::init();
 
-    let mut vec_test = vec![1, 2, 3, 4, 5, 6, 7];
-    vec_test[3] = 42;
-    for i in &vec_test {
-        print!("{} ", i);
+    // provoke a divide-by-zero fault
+    fn divide_by_zero() {
+        unsafe { asm!("mov dx, 0; div dx" ::: "ax", "dx" : "volatile", "intel") }
     }
-
-    for i in 0..10000 {
-        format!("Some String");
-    }
+    divide_by_zero();
 
     println!("It did not crash!");
 
