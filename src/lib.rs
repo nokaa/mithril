@@ -1,7 +1,9 @@
 #![feature(alloc, collections)]
 #![feature(asm)]
 #![feature(const_fn)]
+#![feature(core_intrinsics)]
 #![feature(lang_items)]
+#![feature(naked_functions)]
 #![feature(unique)]
 #![no_std]
 
@@ -43,11 +45,8 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     // initialize our IDT
     interrupts::init();
 
-    // provoke a divide-by-zero fault
-    fn divide_by_zero() {
-        unsafe { asm!("mov dx, 0; div dx" ::: "ax", "dx" : "volatile", "intel") }
-    }
-    divide_by_zero();
+    // provoke an invalid opcode exception
+    unsafe { *(0xdeadbeaf as *mut u64) = 42 };
 
     println!("It did not crash!");
 
