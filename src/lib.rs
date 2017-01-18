@@ -41,18 +41,17 @@ pub extern "C" fn rust_main(multiboot_information_address: usize) {
     enable_write_protect_bit();
 
     // set up guard page and map the heap pages
-    memory::init(boot_info);
+    let mut memory_controller = memory::init(boot_info);
 
     // initialize our IDT
-    interrupts::init();
+    interrupts::init(&mut memory_controller);
 
-    // trigger a breakpoint exception
-    unsafe { int!(3) };
-
-    // provoke a page fault
-    unsafe {
-        *(0xdeadbeaf as *mut u64) = 42;
+    fn stack_overflow() {
+        stack_overflow();
     }
+
+    // trigger a stack overflow
+    stack_overflow();
 
     println!("It did not crash!");
 
